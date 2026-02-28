@@ -26,7 +26,7 @@ export function History() {
   }, [user, profile])
 
   const handleDelete = async () => {
-    if (!deleteTarget) return
+    if (!deleteTarget || !deleteTarget.id) return
     setDeleting(true)
     try {
       await deleteQuotation(deleteTarget.id)
@@ -54,7 +54,7 @@ export function History() {
         </div>
       ) : quotations.length === 0 ? (
         <div className="bg-white rounded-xl shadow border border-gray-100 p-8 text-center text-gray-500">
-          No quotations yet.{' '}
+          No quotations yet.{" "}
           <Link to="/quotation/new" className="text-primary-600 font-medium hover:underline">
             Create one
           </Link>
