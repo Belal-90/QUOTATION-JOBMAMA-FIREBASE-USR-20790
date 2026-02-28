@@ -7,7 +7,7 @@ import {
   type User,
 } from 'firebase/auth'
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
-import { auth, db } from '../lib/firebase'
+import { getFirebaseInitError, getFirebaseServices } from '../lib/firebase'
 import type { UserProfile, UserRole } from '../types'
 
 interface AuthContextType {
@@ -28,6 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    const initError = getFirebaseInitError()
+    if (initError) {
+      setLoading(false)
+      return
+    }
+
+    const { auth, db } = getFirebaseServices()
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser)
       if (firebaseUser) {
@@ -46,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const signIn = async (email: string, password: string) => {
+    const { auth } = getFirebaseServices()
     await signInWithEmailAndPassword(auth, email, password)
   }
 
@@ -55,6 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     displayName: string,
     role: UserRole
   ) => {
+    const { auth, db } = getFirebaseServices()
     const { user: newUser } = await createUserWithEmailAndPassword(auth, email, password)
     const profileData: UserProfile = {
       uid: newUser.uid,
@@ -67,12 +76,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signOut = async () => {
+    const { auth } = getFirebaseServices()
     await firebaseSignOut(auth)
     setProfile(null)
   }
 
   const updateProfile = async (updates: Partial<Pick<UserProfile, 'displayName' | 'letterheadUrl'>>) => {
     if (!user) return
+    const { db } = getFirebaseServices()
     const ref = doc(db, 'users', user.uid)
     await updateDoc(ref, updates as Record<string, unknown>)
     const snap = await getDoc(ref)

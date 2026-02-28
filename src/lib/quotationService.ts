@@ -14,7 +14,7 @@ import {
   type Timestamp,
 } from 'firebase/firestore'
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { db, storage } from './firebase'
+import { getFirebaseServices } from './firebase'
 import type { Quotation, QuotationRow } from '../types'
 
 const COLLECTION = 'quotations'
@@ -56,6 +56,7 @@ function mapDoc(id: string, data: Record<string, unknown>): Quotation {
 }
 
 export async function createQuotation(userId: string, data: Omit<Quotation, 'id' | 'userId' | 'createdAt'>): Promise<string> {
+  const { db } = getFirebaseServices()
   const payload = stripUndefined({
     ...data,
     userId,
@@ -66,6 +67,7 @@ export async function createQuotation(userId: string, data: Omit<Quotation, 'id'
 }
 
 export async function getQuotationsForUser(userId: string, isAdmin: boolean): Promise<Quotation[]> {
+  const { db } = getFirebaseServices()
   const col = collection(db, COLLECTION)
   const q = isAdmin
     ? query(col, orderBy('createdAt', 'desc'))
@@ -80,6 +82,7 @@ export function subscribeQuotationsForUser(
   isAdmin: boolean,
   callback: (quotations: Quotation[]) => void
 ): () => void {
+  const { db } = getFirebaseServices()
   const col = collection(db, COLLECTION)
   const q = isAdmin
     ? query(col, orderBy('createdAt', 'desc'))
@@ -92,12 +95,14 @@ export function subscribeQuotationsForUser(
 }
 
 export async function getQuotationById(id: string): Promise<Quotation | null> {
+  const { db } = getFirebaseServices()
   const d = await getDoc(doc(db, COLLECTION, id))
   if (!d.exists()) return null
   return mapDoc(d.id, d.data())
 }
 
 export async function updateQuotation(id: string, data: Partial<Quotation>): Promise<void> {
+  const { db } = getFirebaseServices()
   const omit: Record<string, unknown> = { ...data }
   delete omit.id
   delete omit.userId
@@ -106,6 +111,7 @@ export async function updateQuotation(id: string, data: Partial<Quotation>): Pro
 }
 
 export async function deleteQuotation(id: string): Promise<void> {
+  const { db } = getFirebaseServices()
   await deleteDoc(doc(db, COLLECTION, id))
 }
 
@@ -116,6 +122,7 @@ function sanitizeStorageFileName(name: string): string {
 }
 
 export async function uploadFile(userId: string, path: string, file: File): Promise<string> {
+  const { storage } = getFirebaseServices()
   const safeName = sanitizeStorageFileName(file.name)
   const filePath = `quotations/${userId}/${path}_${Date.now()}_${safeName}`
   const storageRef = ref(storage, filePath)
