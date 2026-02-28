@@ -14,4 +14,12 @@ export default defineConfig({
       },
     },
   },
+  preview: {
+    host: '0.0.0.0',
+    port: Number(process.env.PORT) || 4173,
+    allowedHosts: [
+      'quotation-jobmama-firebase-usr-20790.onrender.com',
+      ...(process.env.RENDER_EXTERNAL_HOSTNAME ? [process.env.RENDER_EXTERNAL_HOSTNAME] : []),
+    ],
+  },
 })
