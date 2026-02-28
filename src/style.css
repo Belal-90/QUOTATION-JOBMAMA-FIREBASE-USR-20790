@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media print {
+  @page {
+    margin-top: 1.5in;
+    margin-bottom: 1.5in;
+    margin-left: 0.75in;
+    margin-right: 0.75in;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .quotation-print-area,
+  .quotation-print-area * {
+    visibility: visible;
+  }
+  .quotation-print-area {
+    display: block !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 0.75in;
+    box-sizing: border-box;
+    background: #fff;
+  }
+  .quotation-print-area #quotation-pdf-content {
+    width: 100% !important;
+    max-width: none !important;
+  }
+  nav, header button, .no-print {
+    display: none !important;
+  }
+}
